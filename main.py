@@ -1,56 +1,92 @@
 import cv2
 import numpy as np
-from cores import cores
+import json
+import os
+from sklearn.neighbors import KNeighborsClassifier
 
-# Função para identificar a cor com base no HSV
-def identificar_cor(hsv):
-    for cor, intervalos in cores.items():
-        for lower, upper in zip(intervalos[::2], intervalos[1::2]):  # Interpola os pares de limites
-            if np.all(lower <= hsv) and np.all(hsv <= upper):
-                return cor
-    return "Desconhecida"
+# Função para carregar as cores salvas no arquivo JSON
+def carregar_cores():
+    if os.path.exists('cores_treinadas.json'):
+        with open('cores_treinadas.json', 'r') as f:
+            return json.load(f)
+    return {}
 
-# Função de callback para capturar o clique do mouse
-def mouse_callback(event, x, y, flags, param):
+# Função para salvar as cores no arquivo JSON
+def salvar_cores(cores):
+    # Converte os valores RGB para tipo int (para garantir que o JSON possa serializar)
+    cores_convertidas = {nome: [list(map(int, cor)) for cor in valores] for nome, valores in cores.items()}
+    with open('cores_treinadas.json', 'w') as f:
+        json.dump(cores_convertidas, f, indent=4)
+
+# Função para treinar o modelo KNN com as cores existentes
+def treinar_modelo(cores):
+    if not cores:
+        return None
+    X = []
+    y = []
+    for nome_cor, valores_rgb in cores.items():
+        for valor_rgb in valores_rgb:
+            X.append(valor_rgb)
+            y.append(nome_cor)
+    
+    knn = KNeighborsClassifier(n_neighbors=3)
+    knn.fit(X, y)
+    return knn
+
+# Função para prever o nome da cor com base no valor RGB
+def prever_cor(cor, knn):
+    cor = np.array([cor]).reshape(1, -1)  # Reshape para que seja compatível com o modelo
+    return knn.predict(cor)[0]
+
+# Função para capturar a cor ao clicar na imagem
+def capturar_cor(event, x, y, flags, param):
+    global imagem, knn, cores
     if event == cv2.EVENT_LBUTTONDOWN:
-        # Obtém o valor da cor no ponto clicado (BGR)
-        bgr = frame[y, x]
-        # Converte para o espaço de cor HSV
-        hsv = cv2.cvtColor(np.uint8([[bgr]]), cv2.COLOR_BGR2HSV)[0][0]
+        cor_bgr = imagem[y, x]
+        cor_rgb = (cor_bgr[2], cor_bgr[1], cor_bgr[0])  # Converte BGR para RGB
+        print(f"Cor capturada no clique: R={cor_rgb[0]}, G={cor_rgb[1]}, B={cor_rgb[2]}")
         
-        # Identifica a cor
-        cor_detectada = identificar_cor(hsv)
+        nome_cor = prever_cor(cor_rgb, knn)
+        print(f"A cor prevista é: {nome_cor}")
 
-        # Mostra o nome da cor e exibe a cor ao lado
-        print(f"Cor detectada no ponto ({x}, {y}): {cor_detectada}")
+        resposta = input(f"A cor está correta? (s/n): ").strip().lower()
+        if resposta == "n":
+            nome_cor = input("Qual é o nome da cor? ").strip()
+            if nome_cor not in cores:
+                cores[nome_cor] = []
+            cores[nome_cor].append(cor_rgb)
+            salvar_cores(cores)  # Salva no arquivo JSON
+            print(f"Cor {nome_cor} salva com o valor RGB: {cor_rgb}")
+            knn = treinar_modelo(cores)  # Re-treina o modelo com as novas cores
 
-        # Desenha o nome da cor na tela
-        cv2.putText(frame, f"Cor: {cor_detectada}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+# Função para iniciar a captura de vídeo
+def iniciar_captura():
+    global imagem, knn, cores
+    cores = carregar_cores()
+    knn = treinar_modelo(cores)  # Treina o modelo com as cores carregadas
+    
+    # Inicia a captura da câmera
+    captura = cv2.VideoCapture(0)
 
-        # Desenha um retângulo com a cor ao lado da tela
-        color_rect = np.zeros((100, 200, 3), dtype=np.uint8)
-        color_rect[:] = bgr
-        cv2.imshow("Cor Detectada", color_rect)
+    while True:
+        ret, imagem = captura.read()
+        if not ret:
+            print("Erro ao acessar a câmera.")
+            break
 
-# Captura de vídeo da câmera
-cap = cv2.VideoCapture(0)  # 0 geralmente é a câmera padrão
+        # Exibe a imagem ao vivo
+        cv2.imshow("Captura de Cores", imagem)
 
-# Configura a janela para capturar o clique
-cv2.namedWindow("Câmera")
-cv2.setMouseCallback("Câmera", mouse_callback)
+        # Configura a captura do clique do mouse
+        cv2.setMouseCallback("Captura de Cores", capturar_cor)
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Falha ao capturar imagem da câmera.")
-        break
+        # Sai do loop ao pressionar a tecla 'q'
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-    # Exibir a imagem com a cor detectada
-    cv2.imshow("Câmera", frame)
+    captura.release()
+    cv2.destroyAllWindows()
 
-    # Quando pressionar 'q', encerra a captura
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
+# Inicia o programa
+if __name__ == "__main__":
+    iniciar_captura()

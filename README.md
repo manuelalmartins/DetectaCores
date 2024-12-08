@@ -31,13 +31,13 @@ pip install opencv-python scikit-learn
 ### Execute o script main.py:
 - python main.py
 
-# O programa irá capturar cores de uma imagem ou da webcam e treinar o modelo para prever a cor com base nos valores RGB. Você pode clicar na imagem para capturar uma cor e fornecer o nome dessa cor.
+### O programa irá capturar cores de uma imagem ou da webcam e treinar o modelo para prever a cor com base nos valores RGB. Você pode clicar na imagem para capturar uma cor e fornecer o nome dessa cor.
 
 ## Exemplo de Uso
 **O modelo irá exibir o nome da cor prevista.**
 **Você pode confirmar se a cor está correta.**
 *Se a cor não for prevista corretamente, o programa solicitará que você forneça o nome correto da cor.*
-# As cores serão salvas em um arquivo cores.json no formato:
+### As cores serão salvas em um arquivo cores.json no formato:
 json
 {
   "vermelho": [
@@ -52,7 +52,7 @@ json
   ]
 }
 **Exemplo de Saída**
-# Quando uma cor for capturada, você verá a seguinte saída no terminal:
+## Quando uma cor for capturada, você verá a seguinte saída no terminal:
 
 Cor capturada no clique: R=163, G=159, B=155
 A cor prevista é: vermelho

@@ -1,45 +1,62 @@
-### YOLOv3 com OpenCV em Python
+# Detecção de Cores com Aprendizado de Máquina
 
-Este repositório contém um exemplo de uso do modelo YOLOv3 para detecção de objetos em tempo real utilizando OpenCV e Python. O código inclui o carregamento do modelo pré-treinado YOLOv3, a configuração do OpenCV DNN, e a realização da detecção de objetos em tempo real a partir de uma captura de vídeo (por exemplo, webcam).
+Este projeto utiliza aprendizado de máquina para identificar e classificar cores com base nos valores RGB extraídos de imagens ou cliques em tempo real. O modelo foi treinado para associar cores RGB a nomes de cores específicos, e é capaz de prever o nome de uma cor com base em suas características RGB.
 
-### Links para Download de Modelos YOLO
+## Tecnologias Utilizadas
 
-#### YOLOv3:
+- **Python 3.x**
+- **OpenCV**: Para captura de imagens e manipulação de cores.
+- **Scikit-learn**: Para treinar o modelo de aprendizado de máquina (K-Nearest Neighbors).
+- **JSON**: Para armazenar e gerenciar as cores e seus valores RGB.
 
-- Arquivo de configuração: [yolov3.cfg](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3.cfg)
-- Arquivo de pesos: [yolov3.weights](https://pjreddie.com/media/files/yolov3.weights)
-- Arquivo de nomes das classes: [coco.names](https://github.com/pjreddie/darknet/blob/master/data/coco.names)
+## Funcionalidades
 
-#### YOLOv3-tiny:
+- **Captura de Cores**: O usuário pode clicar em uma imagem ou capturar uma cor em tempo real de uma webcam.
+- **Treinamento do Modelo**: O modelo é treinado com um conjunto de cores e seus respectivos nomes para prever cores desconhecidas.
+- **Previsão de Cor**: O modelo prevê o nome da cor baseada no valor RGB capturado.
+- **Armazenamento de Cores**: O projeto salva as cores e seus valores RGB em um arquivo JSON para consulta futura. Caso a cor já exista, ela será atualizada com novos valores RGB.
 
-- Arquivo de configuração: [yolov3-tiny.cfg](https://github.com/pjreddie/darknet/blob/master/cfg/yolov3-tiny.cfg)
-- Arquivo de pesos: [yolov3-tiny.weights](https://pjreddie.com/media/files/yolov3-tiny.weights)
-- Arquivo de nomes das classes: [coco.names](https://github.com/pjreddie/darknet/blob/master/data/coco.names)
+## Como Executar
 
-### Descrição do Código
+### Pré-requisitos
 
-Este código faz o seguinte:
+Certifique-se de ter o Python 3.x instalado em sua máquina. Além disso, instale as bibliotecas necessárias utilizando o `pip`:
+pip install opencv-python scikit-learn
 
-1. **Carrega o modelo YOLOv3 pré-treinado**:
-   Utiliza a função `cv2.dnn.readNetFromDarknet` para carregar a configuração (`.cfg`) e os pesos (`.weights`) do modelo YOLOv3.
+### Passos para Executar
+- **Clone este repositório:**
+- **git clone https://github.com/manuelalmartins/DetectaCores.git**
+- **cd DetectaCores**
 
-2. **Pré-processa os frames de vídeo**:
-   Redimensiona e normaliza os frames capturados para que possam ser usados como entrada para o modelo YOLOv3.
+### Execute o script main.py:
+- python main.py
 
-3. **Detecta objetos nos frames**:
-   Utiliza o modelo carregado para detectar objetos nos frames pré-processados.
+# O programa irá capturar cores de uma imagem ou da webcam e treinar o modelo para prever a cor com base nos valores RGB. Você pode clicar na imagem para capturar uma cor e fornecer o nome dessa cor.
 
-4. **Desenha as detecções nos frames**:
-   Desenha caixas delimitadoras ao redor dos objetos detectados, juntamente com a classe e a confiança da detecção.
+## Exemplo de Uso
+**O modelo irá exibir o nome da cor prevista.**
+**Você pode confirmar se a cor está correta.**
+*Se a cor não for prevista corretamente, o programa solicitará que você forneça o nome correto da cor.*
+# As cores serão salvas em um arquivo cores.json no formato:
+json
+{
+  "vermelho": [
+    [255, 0, 0],
+    [200, 0, 0]
+  ],
+  "azul": [
+    [0, 0, 255]
+  ],
+  "cinza": [
+    [161, 161, 159]
+  ]
+}
+**Exemplo de Saída**
+# Quando uma cor for capturada, você verá a seguinte saída no terminal:
 
-### COCO
-
-Common Objects in Context: https://cocodataset.org/#overview
-
-### DNN (Deep Neural Network) no OpenCV
-
-A DNN (Deep Neural Network) é uma biblioteca no OpenCV que permite o uso de redes neurais profundas para diversas tarefas de visão computacional, como classificação de imagens, detecção de objetos, e segmentação semântica. A API DNN do OpenCV oferece uma interface para carregar e executar modelos treinados em diferentes frameworks de deep learning, como Caffe, TensorFlow, PyTorch e Darknet. Ela suporta tanto a CPU quanto a GPU, tornando-a flexível e eficiente para aplicações em tempo real.
-
-### Darknet
-
-Darknet é uma estrutura de rede neural de código aberto escrita em C e CUDA. Ela é utilizada principalmente para a detecção de objetos em tempo real. YOLO (You Only Look Once) é uma das implementações mais conhecidas que utilizam Darknet. YOLO é altamente eficiente e capaz de detectar objetos em uma única passagem pela rede neural, ao contrário de métodos tradicionais que requerem múltiplas passagens. Darknet é conhecido por seu desempenho rápido e capacidade de ser executado em tempo real em GPUs.
+Cor capturada no clique: R=163, G=159, B=155
+A cor prevista é: vermelho
+A cor está correta? (s/n): n
+Qual é o nome da cor? cinza
+Salvamento de Cores
+Se a cor não foi salva previamente, ela será adicionada ao arquivo cores.json. Caso a cor já tenha sido registrada, o novo valor RGB será adicionado à lista existente para essa cor.

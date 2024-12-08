@@ -4,21 +4,21 @@ import json
 import os
 from sklearn.neighbors import KNeighborsClassifier
 
-# Função para carregar as cores salvas no arquivo JSON
+
 def carregar_cores():
     if os.path.exists('cores_treinadas.json'):
         with open('cores_treinadas.json', 'r') as f:
             return json.load(f)
     return {}
 
-# Função para salvar as cores no arquivo JSON
+
 def salvar_cores(cores):
     # Converte os valores RGB para tipo int (para garantir que o JSON possa serializar)
     cores_convertidas = {nome: [list(map(int, cor)) for cor in valores] for nome, valores in cores.items()}
     with open('cores_treinadas.json', 'w') as f:
         json.dump(cores_convertidas, f, indent=4)
 
-# Função para treinar o modelo KNN com as cores existentes
+
 def treinar_modelo(cores):
     if not cores:
         return None
